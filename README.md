@@ -47,9 +47,8 @@ from pandas import json_normalize
 # Load environment variables.
 dotenv.load_dotenv()
 
-# Set up connection to MySQL database with environment variables.
-server_name = os.getenv("servername")
-database_name = os.getenv("database")
+client = schwabdev.Client(os.getenv("app_key"), os.getenv("app_secret"))
+client.update_tokens_auto()
 ```
 Use SchwabDevs ".Client" function to connect via environment variables.
 
