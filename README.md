@@ -1,6 +1,6 @@
 # Market Data Analysis Project
 
-Check out the SchwabDev API Package here!
+[Check out Tyler's SchwabDev API Package here!](https://github.com/tylerebowers/Schwab-API-Python)
 
 Check out my dashboard here! 
 
@@ -47,6 +47,13 @@ from pandas import json_normalize
 # Load environment variables.
 dotenv.load_dotenv()
 
+# Set up connection to MySQL database with environment variables.
+server_name = os.getenv("servername")
+database_name = os.getenv("database")
+```
+Use SchwabDevs ".Client" function to connect via environment variables.
+
+```python
 client = schwabdev.Client(os.getenv("app_key"), os.getenv("app_secret"))
 client.update_tokens_auto()
 ```
@@ -319,3 +326,5 @@ The final phase of the project involves creating a dynamic Power BI report with 
 **Moving Average Lines:** Incorporate 10, 20, 50, 100, and 200-day moving averages.
 
 **Financial Data:** Display key financial ratios and data for the selected company.
+
+![Market Dashboard photo](https://github.com/user-attachments/assets/e8289598-f0f1-4b73-a9ee-935ff57a65c1)
