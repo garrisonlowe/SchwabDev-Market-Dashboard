@@ -50,12 +50,6 @@ dotenv.load_dotenv()
 client = schwabdev.Client(os.getenv("app_key"), os.getenv("app_secret"))
 client.update_tokens_auto()
 ```
-Use SchwabDevs ".Client" function to connect via environment variables.
-
-```python
-client = schwabdev.Client(os.getenv("app_key"), os.getenv("app_secret"))
-client.update_tokens_auto()
-```
 
 #### 2. Data Acquisition
 - Web scrape the current list of S&P 500 companies from Wikipedia.
