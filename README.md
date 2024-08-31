@@ -4,7 +4,7 @@
 
 [Check out my dashboard here!](https://app.powerbi.com/view?r=eyJrIjoiMDAyNzlkN2ItYmJhMS00MjY5LWIwOGEtZWU4YjZkMTM1OWIxIiwidCI6ImJkMGNhZWQyLTBiNTctNDllNy1hMjY2LTYzMWZhNmE2YzIyYSJ9)
 
-**NOTE:** Visual may be blurry due to licensing of the imported candlestick visual, the functionality will still work though.
+**NOTE:** Visual may be blurry due to licensing of the imported candlestick visual, the functionality will still work though. Full screenshot at the bottom!
 
 # Project Overview
 This project aims to analyze the market data of S&P 500 companies over the past five years. Using a combination of web scraping, API integration, and data visualization techniques, the project will pull, store, and visualize the data in an interactive Power BI report.
