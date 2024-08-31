@@ -1,0 +1,99 @@
+dimPeriod = 
+//PURPOSE: Create a table with 9 rows. Each row represents a precise period of time: 1D, 5D, ..., 5Y
+VAR _MaxDate    = MAX(market_data[Date])
+VAR _MinDate    = MIN(market_data[Date])
+VAR _ReferenceDate    = DATE(YEAR(_MaxDate),MONTH(_MaxDate), DAY(_MaxDate))
+VAR _src        = CALENDAR( _ReferenceDate - 8, _ReferenceDate ) 
+VAR _EndDate    = _ReferenceDate
+RETURN
+    GENERATE (
+         _src,
+        VAR BaseDate = [date]
+        VAR _Order = SWITCH(TRUE,
+                                BaseDate = _ReferenceDate, 1, --1D
+                                BaseDate = _ReferenceDate - 1, 2, --5D
+                                BaseDate = _ReferenceDate - 2, 3, --1M
+                                BaseDate = _ReferenceDate - 3, 4, --3M
+                                BaseDate = _ReferenceDate - 4, 5, --6M
+                                BaseDate = _ReferenceDate - 5, 6, --YTD
+                                BaseDate = _ReferenceDate - 6, 7, --1Y
+                                BaseDate = _ReferenceDate - 7, 8, --2Y
+                                BaseDate = _ReferenceDate - 8, 9 --5Y
+                             )
+        VAR _StartDate = SWITCH(TRUE,
+                                BaseDate = _ReferenceDate,   _EndDate - 1, --1D
+                                BaseDate = _ReferenceDate - 1, _EndDate - 5, --5D
+                                BaseDate = _ReferenceDate - 2, _EndDate - 30, --1M
+                                BaseDate = _ReferenceDate - 3, _EndDate - 90, --3M
+                                BaseDate = _ReferenceDate - 4, _EndDate - 180, --6M
+                                BaseDate = _ReferenceDate - 5, DATE(YEAR(BaseDate),1,1), --YTD
+                                BaseDate = _ReferenceDate - 6, DATE(YEAR(BaseDate)-1,MONTH(BaseDate),DAY(_ReferenceDate)), --1Y
+                                BaseDate = _ReferenceDate - 7, DATE(YEAR(BaseDate)-2,MONTH(BaseDate),DAY(_ReferenceDate)), --2Y
+                                BaseDate = _ReferenceDate - 8, _MinDate 
+                             )
+        VAR _StardDateAjusted = SWITCH(TRUE,
+                                WEEKDAY(_StartDate,2) = 6, _StartDate  +  2, --Saturday
+                                WEEKDAY(_StartDate,2) = 7, _StartDate  +  1, --Sunday
+                                _StartDate      
+                             )
+        VAR _PeriodName = SWITCH(TRUE,
+                                BaseDate = _ReferenceDate,   "1D",
+                                BaseDate = _ReferenceDate - 1, "5D",
+                                BaseDate = _ReferenceDate - 2, "1M",
+                                BaseDate = _ReferenceDate - 3, "3M",
+                                BaseDate = _ReferenceDate - 4, "6M",
+                                BaseDate = _ReferenceDate - 5, "YTD",
+                                BaseDate = _ReferenceDate - 6, "1Y",
+                                BaseDate = _ReferenceDate - 7, "2Y", 
+                                BaseDate = _ReferenceDate - 8, "5Y" 
+                             )
+        RETURN ROW (
+            "Order", _Order,
+            "StartDate", _StardDateAjusted,
+            "EndDate", _EndDate,
+            "Period", _PeriodName
+             )
+    )
+------------------------------------------------------------------------------------------------
+BeginingPeriodPrice = 
+VAR _Price = CALCULATE( MAX( market_data[Close] ), market_data[Date] = MAX( dimPeriod[StartDate] ) )
+VAR _AjustedPrice = CALCULATE( MAX( market_data[Close] ), market_data[Date] = MAX( dimPeriod[StartDate]) + 1 )
+RETURN
+IF( _Price = BLANK(), _AjustedPrice, _Price )
+------------------------------------------------------------------------------------------------
+DateFilter = IF( MAX( market_data[Date]) >= MAX( dimPeriod[StartDate] ), 1 )
+------------------------------------------------------------------------------------------------
+Last Close Price = 
+VAR _LastDate = CALCULATE(MAX(market_data[Date]), ALLSELECTED(market_data))
+RETURN
+CALCULATE( AVERAGE( market_data[Close] ), market_data[Date] = _LastDate)
+------------------------------------------------------------------------------------------------
+Moving average = 
+VAR _Period = SELECTEDVALUE(tParameter[NumberOfDays])
+VAR _Numerator = CALCULATE(
+                             SUM(market_data[Close]), DATESINPERIOD(market_data[Date],LASTDATE(market_data[Date]), - _Period, DAY )
+)
+VAR _Denominator = CALCULATE(
+                             COUNT(market_data[Date]), DATESINPERIOD(market_data[Date],LASTDATE(market_data[Date]), - _Period, DAY )
+                            )
+RETURN
+DIVIDE(_Numerator, _Denominator)
+------------------------------------------------------------------------------------------------
+Variation # = 
+VAR _Delta = [Last Close Price] - [BeginingPeriodPrice]
+VAR _Period = MAX(dimPeriod[Period])
+VAR _Arrow = IF(_Delta > 0, UNICHAR( 129033 ) , UNICHAR( 129035 )) & " "
+RETURN
+_Arrow & FORMAT(ABS(_Delta), "$0.00") & "  " & _Period
+------------------------------------------------------------------------------------------------
+Variation % = 
+VAR _Variation = DIVIDE([Last Close Price], [BeginingPeriodPrice]) - 1
+VAR _Arrow = IF(_Variation > 0, UNICHAR( 129033 ) , UNICHAR( 129035 )) & " "
+VAR _Period = MAX(dimPeriod[Period])
+RETURN
+_Arrow & FORMAT(ABS(_Variation), "0.00%") & " " & _Period 
+------------------------------------------------------------------------------------------------
+Variation Indicator = 
+VAR _Variation = DIVIDE([Last Close Price], [BeginingPeriodPrice]) - 1
+RETURN
+IF( _Variation >= 0, 1, 0 ) -- 1 = green ; 0 = red
