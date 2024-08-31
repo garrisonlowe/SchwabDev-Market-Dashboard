@@ -6,6 +6,8 @@
 
 **NOTE:** Visual may be blurry due to licensing of the imported candlestick visual, the functionality will still work though. Full screenshot at the bottom!
 
+**NOTE 2:** The market data CSV cannot be uploaded to GitHub due to the 25mb file size limit. A link to a google drive can be found [here!](https://drive.google.com/drive/folders/1NPMEJZlCsCOa7qWBjVpb7WSp3sL1-8Pa?usp=sharing). 
+
 # Project Overview
 This project aims to analyze the market data of S&P 500 companies over the past five years. Using a combination of web scraping, API integration, and data visualization techniques, the project will pull, store, and visualize the data in an interactive Power BI report.
 
